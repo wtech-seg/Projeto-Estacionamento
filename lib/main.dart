@@ -17,9 +17,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Wtech App',
       theme: WtechTheme.defaultTheme,
-      home: const LoginPage(),
-      // initialRoute: AppRoutes.splash,
-      // onGenerateRoute: AppRouter.generateRoute, // ← inicia na splash
+      // home: const LoginPage(),
+      initialRoute: AppRoutes.splash,
+      onGenerateRoute: AppRouter.generateRoute, // ← inicia na splash
     );
   }
 }
