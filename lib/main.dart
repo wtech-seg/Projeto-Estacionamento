@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wtech_design_system/design_system/design_system.dart';
-import 'package:wtech_estacionamento/pages/login_page.dart';
+import 'providers/auth_provider.dart';
 import 'routes/app_router.dart';
 import 'routes/app_routes.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        // Outros providers, se houver
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
