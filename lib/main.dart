@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wtech_design_system/design_system/design_system.dart';
+import 'package:wtech_estacionamento/fingerprint_test.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_input_provider.dart';
 import 'routes/app_router.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Wtech App',
       theme: WtechTheme.defaultTheme,
+      //home: BiometricsTestScreen(),
       initialRoute: AppRoutes.splash,
       onGenerateRoute: AppRouter.generateRoute, // Aqui a rota será gerada pelo AppRouter
     );

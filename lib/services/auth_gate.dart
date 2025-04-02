@@ -22,25 +22,17 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> _checkSession() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    bool expired = await authProvider.isSessionExpired();
-
-    if (expired) {
-      // Se a sessão expirou, solicitar autenticação biométrica
-      bool biometricsSuccess = await _biometricsAuth.authenticate();
-      if (biometricsSuccess) {
-        // Após autenticar com biometria, atualize a expiração do token.
-        // Você pode decidir qual novo período definir. Exemplo: mais 2 horas (7200 segundos)
-        await authProvider.updateTokenExpiry(extraSeconds: 1);
-      }
-      setState(() {
-        _isAuthenticated = biometricsSuccess;
-      });
-    } else {
-      setState(() {
-        _isAuthenticated = true;
-      });
+    // Força a autenticação biométrica independentemente do token expirar ou não
+    bool biometricsSuccess = await _biometricsAuth.authenticate();
+    print("Resultado biométrico: $biometricsSuccess");
+    if (biometricsSuccess) {
+      // Atualize a expiração do token se necessário (aqui você pode definir um tempo mais longo)
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.updateTokenExpiry(extraSeconds: 7200);
     }
+    setState(() {
+      _isAuthenticated = biometricsSuccess;
+    });
   }
 
   @override

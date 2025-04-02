@@ -13,7 +13,7 @@ class AppRouter {
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => const LoginPage());
       case AppRoutes.home:
-        return MaterialPageRoute(builder: (_) => const AuthGate(child: HomePage()));
+        return MaterialPageRoute(builder: (_) => const HomePage());
       default:
         return MaterialPageRoute(
           builder:
