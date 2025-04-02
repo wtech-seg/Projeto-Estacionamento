@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wtech_estacionamento/services/biometrics_auth.dart';
 import '../providers/auth_provider.dart';
+import '../services/biometrics_auth.dart';
 
 class AuthGate extends StatefulWidget {
   final Widget child;
@@ -23,16 +23,15 @@ class _AuthGateState extends State<AuthGate> {
 
   Future<void> _checkSession() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    // Define o timeout, por exemplo, 2 horas
-    final Duration timeout = const Duration(seconds: 10);
-    bool expired = await authProvider.isSessionExpired(timeout);
+    bool expired = await authProvider.isSessionExpired();
 
     if (expired) {
-      // Se a sessão expirou, solicitar biometria
+      // Se a sessão expirou, solicitar autenticação biométrica
       bool biometricsSuccess = await _biometricsAuth.authenticate();
       if (biometricsSuccess) {
-        // Se autenticado com biometria, atualiza o timestamp
-        await authProvider.updateLastAuthTime();
+        // Após autenticar com biometria, atualize a expiração do token.
+        // Você pode decidir qual novo período definir. Exemplo: mais 2 horas (7200 segundos)
+        await authProvider.updateTokenExpiry(extraSeconds: 1);
       }
       setState(() {
         _isAuthenticated = biometricsSuccess;

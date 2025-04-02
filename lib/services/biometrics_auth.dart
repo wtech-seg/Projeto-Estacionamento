@@ -6,6 +6,7 @@ class BiometricsAuth {
 
   Future<bool> authenticate() async {
     bool canCheckBiometrics = await auth.canCheckBiometrics;
+    print(canCheckBiometrics);
     if (!canCheckBiometrics) return false;
 
     try {
