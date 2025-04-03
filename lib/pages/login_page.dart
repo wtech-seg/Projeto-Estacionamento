@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:wtech_design_system/design_system/components/password_field.dart';
 import 'package:wtech_design_system/design_system/components/wtech_mobile_button.dart';
 import 'package:wtech_design_system/design_system/design_system.dart';
@@ -22,13 +23,12 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode cpfFocusNode = FocusNode();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   bool isLoading = false;
   late final LocalAuthentication auth;
   bool _supportState = false;
 
-  // Controla se a autenticação biométrica já foi solicitada nesta tela.
-  bool _biometricPromptShown = false;
   final BiometricsAuth _biometricsAuth = BiometricsAuth();
 
   @override
@@ -36,29 +36,24 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     auth = LocalAuthentication();
-    auth.isDeviceSupported().then(
-          (bool isSupported) {
-        setState(() {
-          _supportState = isSupported;
-        });
-      },
-    );
+    auth.isDeviceSupported().then((bool isSupported) {
+      setState(() {
+        _supportState = isSupported;
+      });
+    });
 
     // Se já existir um CPF salvo, exibe a versão mascarada.
-    final userInputProvider = Provider.of<UserInputProvider>(context, listen: false);
+    final userInputProvider =
+    Provider.of<UserInputProvider>(context, listen: false);
     if (userInputProvider.cpf.isNotEmpty) {
       cpfController.text = userInputProvider.maskedCpf;
-      // Chama o prompt biométrico apenas uma vez
-      if (!_biometricPromptShown) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _promptBiometrics();
-        });
-      }
+      // Apenas se a preferência for "true", dispara o prompt biométrico automaticamente.
+      _checkStoredBiometricsPreference();
     }
 
-    // Listener para tratar o foco no campo CPF:
     cpfFocusNode.addListener(() {
-      final userInputProvider = Provider.of<UserInputProvider>(context, listen: false);
+      final userInputProvider =
+      Provider.of<UserInputProvider>(context, listen: false);
       if (cpfFocusNode.hasFocus) {
         // Exibe o CPF completo para edição
         cpfController.text = userInputProvider.cpf;
@@ -66,49 +61,17 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
           TextPosition(offset: cpfController.text.length),
         );
       } else {
-        // Quando perde o foco, salva o CPF "cru" (apenas dígitos) e exibe a versão mascarada
+        // Ao perder o foco, salva o CPF "cru" (apenas dígitos) e exibe a versão mascarada
         final rawCpf = cpfController.text.replaceAll(RegExp(r'\D'), '');
         userInputProvider.setCpf(rawCpf);
         cpfController.text = userInputProvider.maskedCpf;
       }
     });
-  }
 
-  Future<bool> _checkBiometrics() async {
-    bool biometricsSuccess = await _biometricsAuth.authenticate();
-    print("Resultado biométrico: $biometricsSuccess");
-    return biometricsSuccess;
-  }
-
-  Future<void> _promptBiometrics() async {
-    _biometricPromptShown = true;
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false, // O usuário precisa escolher uma opção
-      builder: (context) => AlertDialog(
-        title: const Text('Autenticação biométrica'),
-        content: const Text('Deseja usar sua digital para acessar o app?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Não'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Sim'),
-          ),
-        ],
-      ),
-    );
-    if (result == true) {
-      bool success = await _checkBiometrics();
-      if (success) {
-        // Se a digital for aprovada, mostra o CPF completo para facilitar a edição.
-        final userInputProvider = Provider.of<UserInputProvider>(context, listen: false);
-        cpfController.text = userInputProvider.cpf;
-      }
-    }
-    // Se o usuário optar por "Não" ou se a digital falhar, ele poderá digitar manualmente.
+    // Após a primeira renderização, se não houver preferência definida, mostra o diálogo.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _promptBiometricsIfNeeded();
+    });
   }
 
   @override
@@ -120,15 +83,65 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  // Detecta quando o app retorna ao primeiro plano
+  // Quando o app retorna ao primeiro plano, se a preferência for "true", dispara a biometria.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      final userInputProvider = Provider.of<UserInputProvider>(context, listen: false);
-      if (userInputProvider.cpf.isNotEmpty) {
-        _promptBiometrics();
+      _checkStoredBiometricsPreference();
+    }
+  }
+
+  /// Se a preferência "use_biometrics" não estiver definida, exibe o diálogo.
+  Future<void> _promptBiometricsIfNeeded() async {
+    String? biometricsPref = await _secureStorage.read(key: 'use_biometrics');
+    if (biometricsPref == null) {
+      // Primeira vez: exibe o diálogo para perguntar se deseja usar biometria
+      bool? result = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('Autenticação biométrica'),
+          content: const Text('Deseja usar sua digital para acessar o app?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Não'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Sim'),
+            ),
+          ],
+        ),
+      );
+      // Salva a preferência
+      await _secureStorage.write(key: 'use_biometrics', value: result.toString());
+      if (result == true) {
+        bool success = await _checkBiometrics();
+        if (success) {
+          // Se a digital for aprovada, navega para a Home.
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
+          return;
+        }
       }
     }
+  }
+
+  /// Verifica a preferência armazenada e, se for "true", dispara a autenticação biométrica automaticamente.
+  Future<void> _checkStoredBiometricsPreference() async {
+    String? biometricsPref = await _secureStorage.read(key: 'use_biometrics');
+    if (biometricsPref == 'true') {
+      bool success = await _checkBiometrics();
+      if (success) {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      }
+    }
+  }
+
+  Future<bool> _checkBiometrics() async {
+    bool biometricsSuccess = await _biometricsAuth.authenticate();
+    print("Resultado biométrico: $biometricsSuccess");
+    return biometricsSuccess;
   }
 
   Widget _buildHeader(Size size) {
