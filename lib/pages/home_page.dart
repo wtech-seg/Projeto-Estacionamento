@@ -42,7 +42,6 @@ class _HomePageState extends State<HomePage> {
             child: Image.asset('assets/images/iconSemFundo.png', height: 23),
           ),
         ],
-        title: const Text('Home'),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28),
