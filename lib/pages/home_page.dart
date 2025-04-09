@@ -21,8 +21,10 @@ class _HomePageState extends State<HomePage> {
     // Recupera o CPF salvo do UserInputProvider e chama fetchVisitors.
     final cpf = Provider.of<UserInputProvider>(context, listen: false).cpf;
     Future.microtask(() {
-      Provider.of<VisitorProvider>(context, listen: false)
-          .fetchVisitors(context, cpf);
+      Provider.of<VisitorProvider>(
+        context,
+        listen: false,
+      ).fetchVisitors(context, cpf);
     });
   }
 
@@ -76,7 +78,8 @@ class _HomePageState extends State<HomePage> {
                   }
                   return ListView.separated(
                     itemCount: visitorProvider.visitors.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 10),
+                    separatorBuilder:
+                        (context, index) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final visitor = visitorProvider.visitors[index];
                       return BodyCard(name: visitor.name);
@@ -89,7 +92,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 28, right: 28, bottom: 65, top: 10),
+        padding: const EdgeInsets.only(
+          left: 28,
+          right: 28,
+          bottom: 65,
+          top: 10,
+        ),
         child: WtechMobileButton(
           label: 'Novo Visitante',
           onPressed: () {
