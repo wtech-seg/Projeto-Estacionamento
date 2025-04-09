@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wtech_estacionamento/pages/login_page.dart';
+import 'package:wtech_estacionamento/pages/register_visitors.dart';
 import 'package:wtech_estacionamento/services/auth_gate.dart';
 import '../pages/splash_page.dart';
 import '../pages/home_page.dart';
@@ -14,6 +15,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LoginPage());
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const HomePage());
+      case AppRoutes.register:
+        return MaterialPageRoute(builder: (_) => const RegisterVisitors());
       default:
         return MaterialPageRoute(
           builder:
