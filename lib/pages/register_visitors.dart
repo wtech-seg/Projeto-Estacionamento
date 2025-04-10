@@ -76,7 +76,6 @@ class _RegisterVisitorsState extends State<RegisterVisitors> {
             child: Image.asset('assets/images/iconSemFundo.png', height: 23),
           ),
         ],
-        title: const Text('Cadastro de Visitante'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
