@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wtech_design_system/design_system/components/wtech_mobile_button.dart';
 import 'package:wtech_design_system/design_system/theme/wtech_colors.dart';
 
 import '../routes/app_routes.dart';
@@ -42,10 +43,84 @@ class _RegisterVisitorsState extends State<RegisterVisitors> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
+                SizedBox(height: size.height * 0.15),
+                Text(
+                  'Cadastrar visitante',
+                  style: TextStyle(
+                    color: WtechColors.textDarkGray,
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Por favor, insira os dados do seu visitante\npara poder prosseguir',
+                  style: TextStyle(
+                    color: WtechColors.textCyan,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+                SizedBox(height: size.height * 0.05),
+                TextFormField(
+                  decoration: InputDecoration(
+                    hintText: 'Nome',
+                    hintStyle: TextStyle(color: WtechColors.textDarkGray),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFF122240)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFF122240)),
+                    ),
+                  ),
+                  style: TextStyle(color: WtechColors.textDarkGray),
+                ),
+                SizedBox(height: size.height * 0.04),
+                TextFormField(
+                  decoration: InputDecoration(
+                    hintText: 'CPF',
+                    hintStyle: TextStyle(color: WtechColors.textDarkGray),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFF122240)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFF122240)),
+                    ),
+                  ),
+                  style: TextStyle(color: WtechColors.textDarkGray),
+                ),
+                SizedBox(height: size.height * 0.04),
+                TextFormField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Telefone',
+                    hintStyle: TextStyle(color: WtechColors.textDarkGray),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFF122240)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFF122240)),
+                    ),
+                  ),
+                  style: TextStyle(color: WtechColors.textDarkGray),
+                ),
               ],
             ),
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(
+          left: 28,
+          right: 28,
+          bottom: 65,
+          top: 10,
+        ),
+        child: WtechMobileButton(
+          label: 'Gerar',
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, AppRoutes.register);
+          },
         ),
       ),
     );

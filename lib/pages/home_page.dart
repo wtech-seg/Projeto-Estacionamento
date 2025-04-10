@@ -15,16 +15,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Supondo que você já tenha o CPF do usuário no Provider, ou pode passar via parâmetro.
   @override
   void initState() {
     super.initState();
-    // Recupera o CPF salvo do UserInputProvider e chama fetchVisitors.
     final cpf = Provider.of<UserInputProvider>(context, listen: false).cpf;
+    // Chama o fetchVisitors() no initState; você pode passar o CPF do usuário se necessário.
     Future.microtask(() {
       Provider.of<VisitorProvider>(
         context,
         listen: false,
-      ).fetchVisitors(context, cpf);
+      ).fetchVisitors(context, cpf); // Exemplo: substitua pelo CPF "cru"
     });
   }
 
@@ -32,18 +33,18 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, AppRoutes.login);
-          },
-        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 21),
             child: Image.asset('assets/images/iconSemFundo.png', height: 23),
           ),
         ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, AppRoutes.login);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -96,7 +97,7 @@ class _HomePageState extends State<HomePage> {
           left: 28,
           right: 28,
           bottom: 65,
-          top: 10,
+          top: 28,
         ),
         child: WtechMobileButton(
           label: 'Novo Visitante',
