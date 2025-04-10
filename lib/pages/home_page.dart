@@ -1,16 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wtech_design_system/design_system/design_system.dart';
+import '../providers/user_input_provider.dart';
+import '../providers/visitor_provider.dart';
+import '../routes/app_routes.dart';
 import 'package:wtech_design_system/design_system/components/body_card.dart';
 import 'package:wtech_design_system/design_system/components/wtech_mobile_button.dart';
-import 'package:wtech_design_system/design_system/design_system.dart';
-import '../routes/app_routes.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // Supondo que você já tenha o CPF do usuário no Provider, ou pode passar via parâmetro.
+  @override
+  void initState() {
+    super.initState();
+    final cpf = Provider.of<UserInputProvider>(context, listen: false).cpf;
+    // Chama o fetchVisitors() no initState; você pode passar o CPF do usuário se necessário.
+    Future.microtask(() {
+      Provider.of<VisitorProvider>(
+        context,
+        listen: false,
+      ).fetchVisitors(context, cpf); // Exemplo: substitua pelo CPF "cru"
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 21),
+            child: Image.asset('assets/images/iconSemFundo.png', height: 23),
+          ),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -42,35 +70,40 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 60),
             Expanded(
-              child: SingleChildScrollView(
-              // clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children: [
-                    BodyCard(name: 'Ana Carolina Nesso Guedes'),
-                    SizedBox(height: 10,),
-                    BodyCard(name: 'Visitante 2'),
-                    SizedBox(height: 10,),
-                    BodyCard(name: 'Visitante 3'),
-                    SizedBox(height: 10,),
-                    BodyCard(name: 'Visitante 4'),
-                    SizedBox(height: 10,),
-                    BodyCard(name: 'Visitante 5'),
-                    SizedBox(height: 10,),
-                    BodyCard(name: 'Visitante 6'),
-                    SizedBox(height: 10,),
-                    BodyCard(name: 'Visitante 7'),
-                  ],
-                ),
+              child: Consumer<VisitorProvider>(
+                builder: (context, visitorProvider, child) {
+                  if (visitorProvider.visitors.isEmpty) {
+                    return const Center(
+                      child: Text('Nenhum visitante cadastrado'),
+                    );
+                  }
+                  return ListView.separated(
+                    itemCount: visitorProvider.visitors.length,
+                    separatorBuilder:
+                        (context, index) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final visitor = visitorProvider.visitors[index];
+                      return BodyCard(name: visitor.name);
+                    },
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 28, right: 28, bottom: 65, top: 10),
+        padding: const EdgeInsets.only(
+          left: 28,
+          right: 28,
+          bottom: 65,
+          top: 28,
+        ),
         child: WtechMobileButton(
           label: 'Novo Visitante',
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, AppRoutes.register);
+          },
         ),
       ),
     );
