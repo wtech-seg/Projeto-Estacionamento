@@ -11,18 +11,21 @@ class Visitor {
     this.phone = '',
   });
 
-  /// Cria um Visitor a partir do JSON recebido pela API (que pode conter somente id e name)
+  /// Cria um Visitor a partir do JSON recebido pela API
+  /// Aqui, assumimos que para listar visitantes a API retorna apenas os campos:
+  /// - id (ou cd_pessoa)
+  /// - no_pessoa (nome do visitante)
   factory Visitor.fromJson(Map<String, dynamic> json) {
     return Visitor(
-      id: json['id']?.toString(),
+      id: json['cd_pessoa']?.toString(), // Ajuste se necessário
       name: json['no_pessoa'] ?? '',
     );
   }
 
-  /// Converte o Visitor em JSON para envio à API (para cadastro, por exemplo)
+  /// Converte o Visitor em JSON para envio à API (cadastro)
   Map<String, dynamic> toJson() {
     return {
-      'no_pessoa': name,
+      'name': name,
       'cpf': cpf,
       'phone': phone,
     };

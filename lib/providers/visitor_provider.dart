@@ -70,4 +70,60 @@ class VisitorProvider with ChangeNotifier {
       print('Erro no fetchVisitors: $e');
     }
   }
+
+  /// Registra (cadastra) um novo visitante via API.
+  Future<bool> registerVisitor(BuildContext context, Visitor visitor) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final token = authProvider.token;
+    String? enterpriseId = authProvider.enterpriseId;
+    String? personId = authProvider.responsibleId; // Usamos responsibleId como personId
+
+    // Se ainda estiverem nulos, tenta decodificar o token para extrair os dados.
+    if (enterpriseId == null || personId == null) {
+      final token = authProvider.token;
+      if (token != null) {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        enterpriseId = decodedToken['enterpriseId']?.toString();
+        personId = decodedToken['personId']?.toString();
+        print('Decoded enterpriseId: $enterpriseId');
+        print('Decoded responsibleId (personId): $personId');
+      }
+    }
+
+    if (token == null || enterpriseId == null || personId == null) {
+      print("Dados de autenticação insuficientes para registrar visitante");
+      return false;
+    }
+
+    // Monta a URL de cadastro conforme especificado
+    final url = Uri.parse(
+        'http://77.37.69.47:8060/wtech/client/persons/visitors/$enterpriseId/$personId'
+    );
+    print("URL (register): $url");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': '${token.trim()}',
+        },
+        body: jsonEncode(visitor.toJson()),
+      );
+      print("Register Response status: ${response.statusCode}");
+      print("Register Response body: ${response.body}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Opcional: atualize a lista de visitantes ou faça outra ação.
+        return true;
+      } else {
+        print("Erro ao cadastrar visitante: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Erro no registerVisitor: $e");
+      return false;
+    }
+  }
+
 }
